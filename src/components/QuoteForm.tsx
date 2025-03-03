@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -127,13 +128,13 @@ const QuoteForm = () => {
   };
   
   const toggleServiceType = (type: string) => {
-    if (serviceTypes.includes(type)) {
-      setServiceTypes(serviceTypes.filter(t => t !== type));
-      setValue("serviceType", serviceTypes.filter(t => t !== type));
-    } else {
-      setServiceTypes([...serviceTypes, type]);
-      setValue("serviceType", [...serviceTypes, type]);
-    }
+    const updatedServiceTypes = serviceTypes.includes(type) 
+      ? serviceTypes.filter(t => t !== type) 
+      : [...serviceTypes, type];
+    
+    setServiceTypes(updatedServiceTypes);
+    // Make sure to update the form value too
+    setValue("serviceType", updatedServiceTypes, { shouldValidate: true });
   };
   
   const saveProgress = () => {
