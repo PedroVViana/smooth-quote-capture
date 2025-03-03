@@ -1,73 +1,3 @@
-# Welcome to your Lovable project
-
-## Project info
-
-**URL**: https://lovable.dev/projects/4e94b4f0-4ee6-45a2-afff-ae3cfcb5fb2f
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/4e94b4f0-4ee6-45a2-afff-ae3cfcb5fb2f) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/4e94b4f0-4ee6-45a2-afff-ae3cfcb5fb2f) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
-
 # Smooth Quote Capture
 
 Formulário intuitivo, organizado e persuasivo para captação de leads qualificados e solicitação de orçamentos.
@@ -77,7 +7,7 @@ Formulário intuitivo, organizado e persuasivo para captação de leads qualific
 - Formulário multi-step para melhor experiência do usuário
 - Design responsivo e mobile-first
 - Validação de campos em tempo real
-- Envio automático de email com os dados do formulário
+- Armazenamento dos dados em planilha do Google Sheets
 - Feedback visual para o usuário durante todo o processo
 
 ## Tecnologias Utilizadas
@@ -89,7 +19,7 @@ Formulário intuitivo, organizado e persuasivo para captação de leads qualific
 - Shadcn UI
 - React Hook Form
 - Framer Motion
-- FormSubmit para envio de emails
+- SheetMonkey para armazenamento de dados
 
 ## Como Executar Localmente
 
@@ -152,7 +82,7 @@ Formulário intuitivo, organizado e persuasivo para captação de leads qualific
 
 ### Configuração de Formulários (Opcional)
 
-Se você quiser usar o serviço de formulários da Netlify em vez do FormSubmit:
+Se você quiser usar o serviço de formulários da Netlify em vez do SheetMonkey:
 
 1. No Dashboard da Netlify, vá para "Site settings" > "Forms"
 2. Ative o serviço de formulários
@@ -163,17 +93,6 @@ Se você quiser usar o serviço de formulários da Netlify em vez do FormSubmit:
 1. No Dashboard da Netlify, vá para "Site settings" > "Domain management"
 2. Clique em "Add custom domain"
 3. Siga as instruções para configurar seu domínio personalizado
-
-## Configuração do EmailJS para Envio de Emails
-
-Para que o formulário envie emails automaticamente, você precisa configurar o EmailJS:
-
-1. Siga as instruções detalhadas no arquivo [EMAILJS_SETUP.md](./EMAILJS_SETUP.md)
-2. Crie uma conta gratuita no [EmailJS](https://www.emailjs.com/)
-3. Configure um serviço de email e um template
-4. Atualize as chaves no código conforme as instruções
-
-Sem essa configuração, o formulário usará um fallback que abre o cliente de email do usuário.
 
 ## Configuração do SheetMonkey para Armazenamento de Dados
 
