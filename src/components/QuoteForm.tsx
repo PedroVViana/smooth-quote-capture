@@ -336,11 +336,17 @@ const QuoteForm = () => {
                   onClick={() => toggleServiceType(service.id)}
                 >
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`service-${service.id}`}
-                      checked={serviceTypes.includes(service.id)}
-                      onCheckedChange={() => toggleServiceType(service.id)}
-                    />
+                    <div className="h-4 w-4">
+                      {serviceTypes.includes(service.id) ? (
+                        <div className="h-4 w-4 rounded-sm bg-primary flex items-center justify-center">
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 1L3.5 6.5L1 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      ) : (
+                        <div className="h-4 w-4 rounded-sm border border-primary"></div>
+                      )}
+                    </div>
                     <Label
                       htmlFor={`service-${service.id}`}
                       className="cursor-pointer font-medium text-sm sm:text-base"
@@ -525,14 +531,22 @@ const QuoteForm = () => {
             </div>
 
             <div className="flex items-start space-x-3">
-              <Checkbox
-                id="gdprConsent"
-                checked={watch("gdprConsent")}
-                onCheckedChange={(checked) => setValue("gdprConsent", Boolean(checked))}
-              />
+              <div className="h-4 w-4 mt-1">
+                <div 
+                  className={`h-4 w-4 rounded-sm cursor-pointer ${watch("gdprConsent") ? "bg-primary" : "border border-primary"} flex items-center justify-center`}
+                  onClick={() => setValue("gdprConsent", !watch("gdprConsent"))}
+                >
+                  {watch("gdprConsent") && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 1L3.5 6.5L1 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+              </div>
               <Label
                 htmlFor="gdprConsent"
                 className="text-xs sm:text-sm font-normal leading-relaxed cursor-pointer"
+                onClick={() => setValue("gdprConsent", !watch("gdprConsent"))}
               >
                 Autorizo o contato para envio da proposta e concordo com a Política de Privacidade e Termos de Uso.
               </Label>
