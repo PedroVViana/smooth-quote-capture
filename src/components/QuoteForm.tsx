@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -32,6 +31,7 @@ import FormTooltip from "./FormTooltip";
 import ProgressBar from "./ProgressBar";
 import FormStep from "./FormStep";
 import SuccessMessage from "./SuccessMessage";
+import { sendQuoteEmail } from "@/services/emailService";
 
 type FormData = {
   // Step 1
@@ -64,6 +64,7 @@ const QuoteForm = () => {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, watch, formState: { errors, isValid }, reset, setValue, getValues } = useForm<FormData>({
     mode: "onChange",
@@ -176,18 +177,35 @@ const QuoteForm = () => {
     }
   };
   
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true);
     console.log("Form submitted:", { ...data, serviceType: serviceTypes });
-    // Here you would typically send the data to your backend
     
-    // Clear stored progress
-    localStorage.removeItem("quoteFormData");
-    
-    // Show success message
-    setSubmitted(true);
-    
-    // Show success toast
-    toast.success("Formulário enviado com sucesso!");
+    try {
+      // Enviar email com os dados do formulário
+      const emailSent = await sendQuoteEmail({
+        ...data,
+        serviceType: serviceTypes
+      });
+      
+      if (emailSent) {
+        // Clear stored progress
+        localStorage.removeItem("quoteFormData");
+        
+        // Show success message
+        setSubmitted(true);
+        
+        // Show success toast
+        toast.success("Formulário enviado com sucesso! Um email foi enviado com seus dados de contato.");
+      } else {
+        toast.error("Houve um erro ao enviar o email. Por favor, tente novamente.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Ocorreu um erro ao enviar o formulário. Por favor, tente novamente mais tarde.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const resetForm = () => {
@@ -203,11 +221,11 @@ const QuoteForm = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
       </div>
       
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
         {/* Step 1: Client Data */}
         <FormStep
           title="Etapa 1 de 5"
@@ -216,38 +234,38 @@ const QuoteForm = () => {
         >
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="flex items-center">
+              <Label htmlFor="name" className="flex items-center text-sm sm:text-base">
                 <User size={16} className="mr-2 text-primary" />
                 Nome completo
                 <FormTooltip content="Como você gostaria de ser chamado?" />
               </Label>
               <Input
                 id="name"
-                className="form-input"
+                className="form-input text-sm sm:text-base"
                 placeholder="Seu nome completo"
                 {...register("name", { required: "Nome é obrigatório" })}
               />
               {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="company" className="flex items-center">
+              <Label htmlFor="company" className="flex items-center text-sm sm:text-base">
                 <Building2 size={16} className="mr-2 text-primary" />
                 Nome da empresa
                 <FormTooltip content="Se aplicável para o seu projeto" />
               </Label>
               <Input
                 id="company"
-                className="form-input"
+                className="form-input text-sm sm:text-base"
                 placeholder="Nome da sua empresa (opcional)"
                 {...register("company")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center">
+              <Label htmlFor="email" className="flex items-center text-sm sm:text-base">
                 <Mail size={16} className="mr-2 text-primary" />
                 Email
                 <FormTooltip content="Para onde podemos enviar sua proposta?" />
@@ -255,7 +273,7 @@ const QuoteForm = () => {
               <Input
                 id="email"
                 type="email"
-                className="form-input"
+                className="form-input text-sm sm:text-base"
                 placeholder="seu@email.com"
                 {...register("email", {
                   required: "Email é obrigatório",
@@ -266,26 +284,26 @@ const QuoteForm = () => {
                 })}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center">
+              <Label htmlFor="phone" className="flex items-center text-sm sm:text-base">
                 <Phone size={16} className="mr-2 text-primary" />
                 Telefone / WhatsApp
                 <FormTooltip content="Caso prefira contato direto" />
               </Label>
               <Input
                 id="phone"
-                className="form-input"
+                className="form-input text-sm sm:text-base"
                 placeholder="(00) 00000-0000"
                 {...register("phone", {
                   required: "Telefone é obrigatório",
                 })}
               />
               {errors.phone && (
-                <p className="text-sm text-red-500">{errors.phone.message}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.phone.message}</p>
               )}
             </div>
           </div>
@@ -297,8 +315,8 @@ const QuoteForm = () => {
           description="O que você precisa? Escolha uma opção abaixo:"
           isActive={step === 2}
         >
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
               {[
                 { id: "website", label: "Site institucional" },
                 { id: "ecommerce", label: "Loja virtual (E-commerce)" },
@@ -309,7 +327,7 @@ const QuoteForm = () => {
               ].map((service) => (
                 <div
                   key={service.id}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md ${
+                  className={`p-3 sm:p-4 rounded-xl border cursor-pointer transition-all hover:shadow-md ${
                     serviceTypes.includes(service.id)
                       ? "border-primary bg-primary/5"
                       : "border-gray-200 bg-white"
@@ -324,7 +342,7 @@ const QuoteForm = () => {
                     />
                     <Label
                       htmlFor={`service-${service.id}`}
-                      className="cursor-pointer font-medium text-base"
+                      className="cursor-pointer font-medium text-sm sm:text-base"
                     >
                       {service.label}
                     </Label>
@@ -335,10 +353,10 @@ const QuoteForm = () => {
 
             {serviceTypes.includes("other") && (
               <div className="space-y-2 animate-fade-in">
-                <Label htmlFor="serviceTypeOther">Especifique o serviço</Label>
+                <Label htmlFor="serviceTypeOther" className="text-sm sm:text-base">Especifique o serviço</Label>
                 <Input
                   id="serviceTypeOther"
-                  className="form-input"
+                  className="form-input text-sm sm:text-base"
                   placeholder="Descreva o serviço que você precisa"
                   {...register("serviceTypeOther", {
                     required: serviceTypes.includes("other")
@@ -347,7 +365,7 @@ const QuoteForm = () => {
                   })}
                 />
                 {errors.serviceTypeOther && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs sm:text-sm text-red-500">
                     {errors.serviceTypeOther.message}
                   </p>
                 )}
@@ -362,58 +380,58 @@ const QuoteForm = () => {
           description="Conte-nos mais sobre seu projeto. Quanto mais detalhes, melhor!"
           isActive={step === 3}
         >
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="objective">
+              <Label htmlFor="objective" className="text-sm sm:text-base">
                 Objetivo principal
                 <FormTooltip content="Ex: Quero um site para captar leads ou um app para melhorar o atendimento ao cliente." />
               </Label>
               <Textarea
                 id="objective"
-                className="form-input min-h-[100px]"
+                className="form-input min-h-[80px] sm:min-h-[100px] text-sm sm:text-base"
                 placeholder="Descreva o objetivo principal do seu projeto"
                 {...register("objective", {
                   required: "O objetivo do projeto é obrigatório",
                 })}
               />
               {errors.objective && (
-                <p className="text-sm text-red-500">{errors.objective.message}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.objective.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="features">
+              <Label htmlFor="features" className="text-sm sm:text-base">
                 Funcionalidades essenciais
                 <FormTooltip content="Ex: login de usuários, integração com APIs, sistema de pagamentos, etc." />
               </Label>
               <Textarea
                 id="features"
-                className="form-input min-h-[100px]"
+                className="form-input min-h-[80px] sm:min-h-[100px] text-sm sm:text-base"
                 placeholder="Liste as principais funcionalidades que seu projeto deve ter"
                 {...register("features", {
                   required: "As funcionalidades do projeto são obrigatórias",
                 })}
               />
               {errors.features && (
-                <p className="text-sm text-red-500">{errors.features.message}</p>
+                <p className="text-xs sm:text-sm text-red-500">{errors.features.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="references">
+              <Label htmlFor="references" className="text-sm sm:text-base">
                 Referências ou Inspirações
                 <FormTooltip content="Links de sites/apps que gosta ou quer algo parecido." />
               </Label>
               <Textarea
                 id="references"
-                className="form-input"
+                className="form-input text-sm sm:text-base"
                 placeholder="Compartilhe links ou exemplos de projetos que te inspiram (opcional)"
                 {...register("references")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Já possui domínio/servidor?</Label>
+              <Label className="text-sm sm:text-base">Já possui domínio/servidor?</Label>
               <RadioGroup
                 defaultValue="no"
                 onValueChange={(value) => setValue("hasDomain", value)}
@@ -421,19 +439,19 @@ const QuoteForm = () => {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="yes" id="domain-yes" />
-                  <Label htmlFor="domain-yes" className="cursor-pointer">
+                  <Label htmlFor="domain-yes" className="cursor-pointer text-sm sm:text-base">
                     Sim
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="no" id="domain-no" />
-                  <Label htmlFor="domain-no" className="cursor-pointer">
+                  <Label htmlFor="domain-no" className="cursor-pointer text-sm sm:text-base">
                     Não
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="help" id="domain-help" />
-                  <Label htmlFor="domain-help" className="cursor-pointer">
+                  <Label htmlFor="domain-help" className="cursor-pointer text-sm sm:text-base">
                     Preciso de ajuda com isso
                   </Label>
                 </div>
@@ -448,9 +466,9 @@ const QuoteForm = () => {
           description="Defina um orçamento e prazo para que possamos oferecer a melhor solução."
           isActive={step === 4}
         >
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="budget" className="flex items-center">
+              <Label htmlFor="budget" className="flex items-center text-sm sm:text-base">
                 <CreditCard size={16} className="mr-2 text-primary" />
                 Faixa de orçamento
               </Label>
@@ -458,7 +476,7 @@ const QuoteForm = () => {
                 onValueChange={(value) => setValue("budget", value)}
                 defaultValue="3k-10k"
               >
-                <SelectTrigger className="form-input">
+                <SelectTrigger className="form-input text-sm sm:text-base">
                   <SelectValue placeholder="Selecione uma faixa de orçamento" />
                 </SelectTrigger>
                 <SelectContent>
@@ -471,7 +489,7 @@ const QuoteForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deadline" className="flex items-center">
+              <Label htmlFor="deadline" className="flex items-center text-sm sm:text-base">
                 <Clock size={16} className="mr-2 text-primary" />
                 Prazo ideal para entrega
               </Label>
@@ -479,7 +497,7 @@ const QuoteForm = () => {
                 onValueChange={(value) => setValue("deadline", value)}
                 defaultValue="1-3months"
               >
-                <SelectTrigger className="form-input">
+                <SelectTrigger className="form-input text-sm sm:text-base">
                   <SelectValue placeholder="Selecione um prazo ideal" />
                 </SelectTrigger>
                 <SelectContent>
@@ -498,9 +516,9 @@ const QuoteForm = () => {
           description="Quase lá! Finalize sua solicitação."
           isActive={step === 5}
         >
-          <div className="space-y-6">
-            <div className="p-6 bg-white/60 border border-gray-200 rounded-xl">
-              <p className="text-gray-700 leading-relaxed">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="p-4 sm:p-6 bg-white/60 border border-gray-200 rounded-xl">
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                 Estamos animados para trazer sua ideia à realidade! Nossa equipe analisará sua solicitação e retornará com a melhor solução para seu projeto.
               </p>
             </div>
@@ -513,48 +531,48 @@ const QuoteForm = () => {
               />
               <Label
                 htmlFor="gdprConsent"
-                className="text-sm font-normal leading-relaxed cursor-pointer"
+                className="text-xs sm:text-sm font-normal leading-relaxed cursor-pointer"
               >
                 Autorizo o contato para envio da proposta e concordo com a Política de Privacidade e Termos de Uso.
               </Label>
             </div>
             {errors.gdprConsent && (
-              <p className="text-sm text-red-500">{errors.gdprConsent.message}</p>
+              <p className="text-xs sm:text-sm text-red-500">{errors.gdprConsent.message}</p>
             )}
           </div>
         </FormStep>
 
         {/* Navigation buttons */}
-        <div className="flex flex-wrap items-center justify-between pt-4">
-          <div className="flex items-center space-x-3 mb-4 sm:mb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 gap-4 sm:gap-0">
+          <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-0">
             <Button 
               type="button" 
               variant="outline" 
               onClick={saveProgress}
-              className="text-xs sm:text-sm h-10"
+              className="text-xs sm:text-sm h-9 sm:h-10 w-full sm:w-auto"
             >
-              <Save className="w-4 h-4 mr-2" /> Salvar progresso
+              <Save className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Salvar progresso
             </Button>
             
             <Button 
               type="button" 
               variant="outline" 
               onClick={loadProgress}
-              className="text-xs sm:text-sm h-10"
+              className="text-xs sm:text-sm h-9 sm:h-10 w-full sm:w-auto"
             >
               Carregar salvo
             </Button>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             {step > 1 && (
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={prevStep}
-                className="h-10"
+                className="h-9 sm:h-10"
               >
-                <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
+                <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1" /> Anterior
               </Button>
             )}
             
@@ -563,17 +581,23 @@ const QuoteForm = () => {
                 type="button"
                 onClick={nextStep}
                 disabled={!checkStepValidity()}
-                className="h-10"
+                className="h-9 sm:h-10"
               >
-                Próximo <ChevronRight className="w-4 h-4 ml-1" />
+                Próximo <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
               </Button>
             ) : (
               <Button 
                 type="submit" 
-                disabled={!watch("gdprConsent")}
-                className="h-10 px-8 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+                disabled={!watch("gdprConsent") || isSubmitting}
+                className="h-9 sm:h-10 px-4 sm:px-8 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-sm"
               >
-                <Send className="w-4 h-4 mr-2" /> Solicitar Orçamento
+                {isSubmitting ? (
+                  <>Enviando...</>
+                ) : (
+                  <>
+                    <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Solicitar Orçamento
+                  </>
+                )}
               </Button>
             )}
           </div>
