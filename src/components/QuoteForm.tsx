@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -197,7 +196,7 @@ const QuoteForm = () => {
         setSubmitted(true);
         
         // Show success toast
-        toast.success("Formulário enviado com sucesso! Um email foi enviado com seus dados de contato.");
+        toast.success("Formulário enviado com sucesso! Seu orçamento foi enviado automaticamente.");
       } else {
         toast.error("Houve um erro ao enviar o email. Por favor, tente novamente.");
       }

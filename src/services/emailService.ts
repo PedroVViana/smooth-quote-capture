@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 type FormData = {
@@ -70,11 +69,14 @@ export const sendQuoteEmail = async (data: FormData): Promise<boolean> => {
   `;
 
   try {
-    // Usar o formsubmit.co que é mais confiável para entrega de emails
+    // Configurar o assunto do email conforme solicitado
+    const emailSubject = `Orçamento de projeto da ${data.name}`;
+    
+    // Usar o formsubmit.co para envio automático de emails
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('email', data.email);
-    formData.append('_subject', 'Nova solicitação de orçamento - ' + data.name);
+    formData.append('_subject', emailSubject);
     
     // Adicionar todos os campos como conteúdo do email
     Object.entries(data).forEach(([key, value]) => {
@@ -98,78 +100,25 @@ export const sendQuoteEmail = async (data: FormData): Promise<boolean> => {
     // Adicionar configurações extras para garantir entrega
     formData.append('_template', 'table'); // Usar o template de tabela que é mais estruturado
     formData.append('_captcha', 'false'); // Desativar captcha para facilitar envio
+    formData.append('_autoresponse', 'Obrigado por solicitar um orçamento! Recebemos sua solicitação e entraremos em contato em breve.'); // Resposta automática para o cliente
 
     // Envio para formsubmit.co
     console.log("Enviando para formsubmit.co...");
-    await fetch('https://formsubmit.co/pedro.vviana@hotmail.com', {
+    const response = await fetch('https://formsubmit.co/pedro.vviana@hotmail.com', {
       method: 'POST',
       body: formData
     });
     
-    // Como backup, enviar também via Email.js se configurado
-    try {
-      const emailJsData = {
-        service_id: 'default_service', // Substituir por um service_id válido se disponível
-        template_id: 'template_default', // Substituir por um template_id válido se disponível
-        user_id: 'user_default', // Substituir por um user_id válido se disponível
-        template_params: {
-          to_name: 'Equipe de Vendas',
-          from_name: data.name,
-          from_email: data.email,
-          to_email: 'pedro.vviana@hotmail.com',
-          subject: 'Nova solicitação de orçamento - ' + data.name,
-          message: emailContent,
-          reply_to: data.email
-        }
-      };
-
-      // Enviar via EmailJS como alternativa (opcional, descomentar se tiver as credenciais configuradas)
-      /*
-      await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailJsData)
-      });
-      */
-    } catch (emailJsError) {
-      console.log("Erro no envio via EmailJS (ignorando pois temos outros métodos):", emailJsError);
+    if (!response.ok) {
+      throw new Error(`Erro no envio: ${response.status} ${response.statusText}`);
     }
-
-    // Método alternativo direto usando mailto link para abrir o cliente de email
-    // Isso abre o cliente de email do usuário com os dados preenchidos
-    const mailtoLink = `mailto:pedro.vviana@hotmail.com?subject=Nova solicitação de orçamento - ${encodeURIComponent(data.name)}&body=${encodeURIComponent(emailContent)}`;
     
-    // Abrir o link em uma nova aba (o usuário precisará enviar manualmente)
-    window.open(mailtoLink, '_blank');
-
     console.log("Email enviado com sucesso!");
-    toast.success("Formulário enviado com sucesso! Você também pode enviar manualmente através do seu cliente de email que foi aberto.");
+    toast.success("Formulário enviado com sucesso! Você receberá uma confirmação por email.");
     return true;
   } catch (error) {
     console.error("Erro ao enviar email:", error);
-    
-    // Mesmo com erro, tenta o método de fallback com mailto
-    try {
-      const mailtoContent = `
-Nome: ${data.name}
-Email: ${data.email}
-Telefone: ${data.phone}
-Tipo de serviço: ${getServiceTypesText(data.serviceType, data.serviceTypeOther)}
-Objetivo: ${data.objective}
-Funcionalidades: ${data.features}
-Orçamento: ${getBudgetText(data.budget)}
-Prazo: ${getDeadlineText(data.deadline)}
-      `;
-      
-      const mailtoLink = `mailto:pedro.vviana@hotmail.com?subject=Nova solicitação de orçamento - ${encodeURIComponent(data.name)}&body=${encodeURIComponent(mailtoContent)}`;
-      window.open(mailtoLink, '_blank');
-      
-      toast.warning("Houve um problema no envio automático. Por favor, envie o email que foi aberto manualmente.");
-      return true; // Retorna true mesmo com o fallback
-    } catch (mailtoError) {
-      console.error("Erro no fallback:", mailtoError);
-      toast.error("Não foi possível enviar o email. Por favor, entre em contato diretamente por pedro.vviana@hotmail.com");
-      return false;
-    }
+    toast.error("Não foi possível enviar o email. Por favor, tente novamente ou entre em contato diretamente por pedro.vviana@hotmail.com");
+    return false;
   }
 };

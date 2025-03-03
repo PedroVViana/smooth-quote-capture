@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,7 @@ const SuccessMessage = ({ onReset }: SuccessMessageProps) => {
       </div>
       
       <h2 className="text-3xl font-display font-semibold mb-4">
-        Solicitação Enviada!
+        Solicitação Enviada com Sucesso!
       </h2>
       
       <motion.p
@@ -46,8 +45,18 @@ const SuccessMessage = ({ onReset }: SuccessMessageProps) => {
         transition={{ delay: 0.7 }}
         className="text-gray-600 mb-8 max-w-md mx-auto"
       >
-        Estamos animados para trazer sua ideia à realidade! Nossa equipe analisará 
-        sua solicitação e retornará com a melhor solução para seu projeto em até 24 horas.
+        Seu orçamento foi enviado automaticamente para nossa equipe! 
+        Estamos animados para trazer sua ideia à realidade e retornaremos 
+        com a melhor solução para seu projeto em até 24 horas.
+      </motion.p>
+      
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.9 }}
+        className="text-gray-500 mb-8 max-w-md mx-auto text-sm"
+      >
+        Você receberá uma confirmação por email em breve.
       </motion.p>
       
       <Button
