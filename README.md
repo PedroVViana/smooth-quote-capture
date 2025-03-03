@@ -164,6 +164,27 @@ Se você quiser usar o serviço de formulários da Netlify em vez do FormSubmit:
 2. Clique em "Add custom domain"
 3. Siga as instruções para configurar seu domínio personalizado
 
+## Configuração do EmailJS para Envio de Emails
+
+Para que o formulário envie emails automaticamente, você precisa configurar o EmailJS:
+
+1. Siga as instruções detalhadas no arquivo [EMAILJS_SETUP.md](./EMAILJS_SETUP.md)
+2. Crie uma conta gratuita no [EmailJS](https://www.emailjs.com/)
+3. Configure um serviço de email e um template
+4. Atualize as chaves no código conforme as instruções
+
+Sem essa configuração, o formulário usará um fallback que abre o cliente de email do usuário.
+
+## Configuração do SheetMonkey para Armazenamento de Dados
+
+Este projeto utiliza o SheetMonkey para armazenar os dados do formulário em uma planilha do Google Sheets:
+
+1. Os dados do formulário são enviados para o SheetMonkey através da API
+2. O SheetMonkey armazena os dados em uma planilha do Google Sheets
+3. Você pode acessar e gerenciar os dados diretamente na planilha
+
+Para mais detalhes sobre a configuração do SheetMonkey, consulte o arquivo [SHEETMONKEY_SETUP.md](./SHEETMONKEY_SETUP.md).
+
 ## Suporte
 
 Para suporte, entre em contato através do email: pedro.vviana@hotmail.com

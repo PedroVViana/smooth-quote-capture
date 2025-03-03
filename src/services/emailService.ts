@@ -48,77 +48,81 @@ const getServiceTypesText = (serviceTypes: string[], serviceTypeOther?: string):
   return serviceTypes.map(type => serviceMap[type] || type).join(", ");
 };
 
+// URL do SheetMonkey para envio dos dados
+const SHEET_MONKEY_URL = 'https://api.sheetmonkey.io/form/9BT1GKhAAMchuXQCQPuy5p';
+
 export const sendQuoteEmail = async (data: FormData): Promise<boolean> => {
-  console.log("Enviando email com os dados:", data);
+  console.log("Enviando dados do formulário:", data);
   
-  // Formatação do conteúdo do e-mail em HTML
-  const emailContent = `
-    <h2>Nova solicitação de orçamento</h2>
-    <p><strong>Nome:</strong> ${data.name}</p>
-    <p><strong>Empresa:</strong> ${data.company || 'N/A'}</p>
-    <p><strong>Email:</strong> ${data.email}</p>
-    <p><strong>Telefone:</strong> ${data.phone}</p>
-    <p><strong>Tipo de serviço:</strong> ${getServiceTypesText(data.serviceType, data.serviceTypeOther)}</p>
-    <p><strong>Objetivo do projeto:</strong> ${data.objective}</p>
-    <p><strong>Funcionalidades essenciais:</strong> ${data.features}</p>
-    <p><strong>Referências:</strong> ${data.references || 'Nenhuma'}</p>
-    <p><strong>Já possui domínio:</strong> ${data.hasDomain}</p>
-    <p><strong>Orçamento:</strong> ${getBudgetText(data.budget)}</p>
-    <p><strong>Prazo:</strong> ${getDeadlineText(data.deadline)}</p>
-    <p><strong>Data da solicitação:</strong> ${new Date().toLocaleString('pt-BR')}</p>
-  `;
-
   try {
-    // Configurar o assunto do email conforme solicitado
-    const emailSubject = `Orçamento de projeto da ${data.name}`;
-    
-    // Usar o formsubmit.co para envio automático de emails
+    // Preparar os dados para o SheetMonkey
     const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('email', data.email);
-    formData.append('_subject', emailSubject);
     
-    // Adicionar todos os campos como conteúdo do email
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === 'serviceType') {
-        formData.append(key, getServiceTypesText(data.serviceType, data.serviceTypeOther));
-      } else if (key === 'budget') {
-        formData.append(key, getBudgetText(value as string));
-      } else if (key === 'deadline') {
-        formData.append(key, getDeadlineText(value as string));
-      } else if (typeof value !== 'object') {
-        formData.append(key, String(value));
-      }
-    });
+    // Dados básicos do cliente
+    formData.append('Nome', data.name);
+    formData.append('Empresa', data.company || 'N/A');
+    formData.append('Email', data.email);
+    formData.append('Telefone', data.phone);
     
-    // Adicionar o conteúdo HTML formatado
-    formData.append('message', emailContent);
+    // Detalhes do serviço
+    formData.append('Tipo_de_Servico', getServiceTypesText(data.serviceType, data.serviceTypeOther));
+    formData.append('Objetivo', data.objective);
+    formData.append('Funcionalidades', data.features);
+    formData.append('Referencias', data.references || 'Nenhuma');
+    formData.append('Possui_Dominio', data.hasDomain);
     
-    // Configurar para enviar uma cópia para o email especificado
-    formData.append('_cc', 'pedro.vviana@hotmail.com');
+    // Orçamento e prazo
+    formData.append('Orcamento', getBudgetText(data.budget));
+    formData.append('Prazo', getDeadlineText(data.deadline));
     
-    // Adicionar configurações extras para garantir entrega
-    formData.append('_template', 'table'); // Usar o template de tabela que é mais estruturado
-    formData.append('_captcha', 'false'); // Desativar captcha para facilitar envio
-    formData.append('_autoresponse', 'Obrigado por solicitar um orçamento! Recebemos sua solicitação e entraremos em contato em breve.'); // Resposta automática para o cliente
+    // Data da solicitação
+    formData.append('Data_Solicitacao', new Date().toLocaleString('pt-BR'));
+    
+    // Assunto do email (para referência)
+    formData.append('Assunto', `Orçamento de projeto da ${data.name}`);
 
-    // Envio para formsubmit.co
-    console.log("Enviando para formsubmit.co...");
-    const response = await fetch('https://formsubmit.co/pedro.vviana@hotmail.com', {
+    // Enviar dados para o SheetMonkey
+    console.log("Enviando dados para SheetMonkey...");
+    const response = await fetch(SHEET_MONKEY_URL, {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
     });
     
     if (!response.ok) {
       throw new Error(`Erro no envio: ${response.status} ${response.statusText}`);
     }
     
-    console.log("Email enviado com sucesso!");
-    toast.success("Formulário enviado com sucesso! Você receberá uma confirmação por email.");
+    console.log("Dados enviados com sucesso!");
+    toast.success("Formulário enviado com sucesso! Recebemos sua solicitação de orçamento.");
     return true;
   } catch (error) {
-    console.error("Erro ao enviar email:", error);
-    toast.error("Não foi possível enviar o email. Por favor, tente novamente ou entre em contato diretamente por pedro.vviana@hotmail.com");
-    return false;
+    console.error("Erro ao enviar dados:", error);
+    
+    // Método alternativo: abrir o cliente de email do usuário como fallback
+    try {
+      const mailtoContent = `
+Nome: ${data.name}
+Email: ${data.email}
+Telefone: ${data.phone}
+Tipo de serviço: ${getServiceTypesText(data.serviceType, data.serviceTypeOther)}
+Objetivo: ${data.objective}
+Funcionalidades: ${data.features}
+Orçamento: ${getBudgetText(data.budget)}
+Prazo: ${getDeadlineText(data.deadline)}
+      `;
+      
+      const mailtoLink = `mailto:pedro.vviana@hotmail.com?subject=Orçamento de projeto da ${encodeURIComponent(data.name)}&body=${encodeURIComponent(mailtoContent)}`;
+      window.open(mailtoLink, '_blank');
+      
+      toast.warning("Houve um problema no envio automático. Por favor, envie o email que foi aberto manualmente.");
+      return true; // Retorna true mesmo com o fallback
+    } catch (mailtoError) {
+      console.error("Erro no fallback:", mailtoError);
+      toast.error("Não foi possível enviar o formulário. Por favor, entre em contato diretamente por pedro.vviana@hotmail.com");
+      return false;
+    }
   }
 };

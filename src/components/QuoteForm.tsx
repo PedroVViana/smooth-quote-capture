@@ -182,7 +182,7 @@ const QuoteForm = () => {
     console.log("Form submitted:", { ...data, serviceType: serviceTypes });
     
     try {
-      // Enviar email com os dados do formulário
+      // Enviar dados do formulário
       const emailSent = await sendQuoteEmail({
         ...data,
         serviceType: serviceTypes
@@ -196,9 +196,9 @@ const QuoteForm = () => {
         setSubmitted(true);
         
         // Show success toast
-        toast.success("Formulário enviado com sucesso! Seu orçamento foi enviado automaticamente.");
+        toast.success("Formulário enviado com sucesso! Sua solicitação foi registrada.");
       } else {
-        toast.error("Houve um erro ao enviar o email. Por favor, tente novamente.");
+        toast.error("Houve um erro ao enviar o formulário. Por favor, tente novamente.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
